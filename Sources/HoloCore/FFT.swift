@@ -56,9 +56,15 @@ enum Radix2FFT {
             length <<= 1
         }
 
-        return (0...(size / 2)).map { index in
-            (real[index] * real[index] + imaginary[index] * imaginary[index]) / Double(size)
+        let scale = Double(size)
+        var spectrum = [Double]()
+        spectrum.reserveCapacity(size / 2 + 1)
+        for index in 0...(size / 2) {
+            let re: Double = real[index]
+            let im: Double = imaginary[index]
+            spectrum.append((re * re + im * im) / scale)
         }
+        return spectrum
     }
 
     static func nextPowerOfTwo(_ value: Int) -> Int {

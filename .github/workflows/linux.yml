@@ -1,0 +1,43 @@
+name: Linux
+
+on:
+  push:
+    branches: [main, linux]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    container: swift:6.0-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ALSA headers
+        run: apt-get update && apt-get install -y --no-install-recommends libasound2-dev
+
+      - name: Build
+        run: swift build
+
+      - name: Unit test
+        run: swift test
+
+  package:
+    needs: build-test
+    runs-on: ubuntu-24.04
+    container: swift:6.0-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packaging tools
+        run: apt-get update && apt-get install -y --no-install-recommends libasound2-dev binutils dpkg-dev
+
+      - name: Build the .deb
+        run: scripts/linux/build-deb.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: holo-deb
+          path: dist/*.deb

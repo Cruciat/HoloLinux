@@ -1,0 +1,14 @@
+[Unit]
+Description=Holo desk tap listener
+Documentation=man:holo(1) file:/usr/share/doc/holo/README.md
+After=graphical-session.target pipewire.service wireplumber.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=@BINDIR@/holo run
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

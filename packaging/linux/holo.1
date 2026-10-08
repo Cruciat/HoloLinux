@@ -1,0 +1,77 @@
+.TH HOLO 1 "October 2026" "holo 0.1.0" "User Commands"
+.SH NAME
+holo \- tap your desk, your laptop responds
+.SH SYNOPSIS
+.B holo
+.I command
+.RI [ options ]
+.SH DESCRIPTION
+Holo listens through the laptop's built-in microphone and turns the desk
+around the laptop into four tap zones: left rear (lr), left front (lf),
+right rear (rr), and right front (rf). Each accepted tap runs the action
+assigned to its zone. Calibration and evaluation are guided sessions in the
+terminal; the
+.B holo.service
+systemd user service listens in the background.
+.SH COMMANDS
+.TP
+.B check
+Show the microphone route, helper tools, profiles, and service state.
+.TP
+.B monitor
+Live input level and tap classification, without actions.
+.TP
+.B calibrate
+Guided calibration of the four desk zones (ten taps each).
+.TP
+.B evaluate
+Guided 60-tap held-out accuracy test; saves JSON and CSV reports.
+.TP
+.B report
+Show the newest accuracy report.
+.TP
+.B compare
+Compare passive, active, and hybrid sensing on this desk.
+.TP
+.B actions
+List, set, clear, or test zone actions.
+.TP
+.B profiles
+List, select, show, rename, or delete desk profiles.
+.TP
+.B config
+Show or change settings (notifications, default capture device).
+.TP
+.B run
+Listen in the foreground and run actions (what the service runs).
+.TP
+.BR pause ", " resume ", " status
+Control and inspect the background service.
+.PP
+Every command accepts
+.BR \-\-help .
+.SH EXAMPLES
+.nf
+holo check
+holo calibrate
+holo evaluate
+holo actions set lr url https://example.com
+holo actions set rr shell 'playerctl play-pause'
+systemctl \-\-user enable \-\-now holo
+journalctl \-\-user \-u holo \-f
+.fi
+.SH FILES
+.TP
+.I ~/.local/share/Holo/
+Profiles, accuracy reports, and optional debug recordings.
+.TP
+.I ~/.config/holo/config.json
+Active profile, notification setting, capture settings per profile.
+.SH ENVIRONMENT
+.BR HOLO_DATA_DIR ", " HOLO_CONFIG_DIR ", " HOLO_RUNTIME_DIR
+override the data, configuration, and runtime directories.
+.SH SEE ALSO
+.BR systemctl (1),
+.BR journalctl (1),
+.BR wpctl (1),
+.I /usr/share/doc/holo/README.md

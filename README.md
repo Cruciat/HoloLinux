@@ -27,6 +27,18 @@ Holo is a research prototype. Automated DSP tests pass, but useful accuracy stil
 
 The requirement-by-requirement evidence ledger is in [ACCEPTANCE.md](ACCEPTANCE.md).
 
+## Linux
+
+An experimental headless Linux port lives in this fork: the same `HoloCore`
+signal processing and classifier, with ALSA/PipeWire capture, terminal
+commands for calibration, evaluation, and actions, and a systemd user
+service that listens in the background. See [docs/LINUX.md](docs/LINUX.md).
+
+```sh
+holo check && holo calibrate && holo evaluate
+systemctl --user enable --now holo
+```
+
 The recovered physical baseline, failure analysis, and controlled iteration protocol are in [ACCURACY.md](ACCURACY.md).
 
 ## What is implemented

@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Screenshot to clipboard through the XDG desktop portal.
+
+Holo runs this on GNOME Wayland when gnome-screenshot is not installed:
+`holo-screenshot-portal` captures the whole screen, `--interactive` opens
+the desktop's own area/window picker. The image is copied to the clipboard
+and the temporary file the portal created is deleted, so nothing is saved.
+Needs python3-gi and wl-clipboard (or xclip on X11).
+"""
+import os
+import shutil
+import subprocess
+import sys
+import urllib.parse
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+
+def take_screenshot(interactive):
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    sender = bus.get_unique_name()[1:].replace(".", "_")
+    token = f"holo{os.getpid()}"
+    handle = f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
+    loop = GLib.MainLoop()
+    result = {}
+
+    def on_response(_connection, _sender, _path, _interface, _signal, parameters):
+        code, results = parameters.unpack()
+        result["code"] = code
+        result["uri"] = results.get("uri")
+        loop.quit()
+
+    # Subscribe before calling so a fast response cannot be missed.
+    bus.signal_subscribe(
+        "org.freedesktop.portal.Desktop",
+        "org.freedesktop.portal.Request",
+        "Response",
+        handle,
+        None,
+        Gio.DBusSignalFlags.NONE,
+        on_response,
+    )
+    options = {
+        "handle_token": GLib.Variant("s", token),
+        "interactive": GLib.Variant("b", interactive),
+        "modal": GLib.Variant("b", False),
+    }
+    bus.call_sync(
+        "org.freedesktop.portal.Desktop",
+        "/org/freedesktop/portal/desktop",
+        "org.freedesktop.portal.Screenshot",
+        "Screenshot",
+        GLib.Variant("(sa{sv})", ("", options)),
+        GLib.VariantType("(o)"),
+        Gio.DBusCallFlags.NONE,
+        -1,
+        None,
+    )
+    GLib.timeout_add_seconds(120, loop.quit)
+    loop.run()
+    return result
+
+
+def copy_image(path):
+    with open(path, "rb") as image:
+        if os.environ.get("WAYLAND_DISPLAY") and shutil.which("wl-copy"):
+            subprocess.run(["wl-copy", "--type", "image/png"], stdin=image, check=True)
+        elif os.environ.get("DISPLAY") and shutil.which("xclip"):
+            subprocess.run(["xclip", "-selection", "clipboard", "-t", "image/png"], stdin=image, check=True)
+        else:
+            sys.exit("holo-screenshot-portal: install wl-clipboard (Wayland) or xclip (X11) to copy images")
+
+
+def main():
+    result = take_screenshot("--interactive" in sys.argv[1:])
+    code = result.get("code")
+    if code == 1:
+        return 0  # cancelled by the user
+    if code != 0 or not result.get("uri"):
+        sys.exit("holo-screenshot-portal: the desktop portal did not return a screenshot")
+    path = urllib.parse.unquote(urllib.parse.urlparse(result["uri"]).path)
+    try:
+        copy_image(path)
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

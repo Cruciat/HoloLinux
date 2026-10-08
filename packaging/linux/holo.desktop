@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Holo
+Comment=Tap your desk, your laptop responds
+Exec=holo status
+Icon=input-tablet
+Terminal=true
+NoDisplay=true
+Categories=Utility;
+X-GNOME-UsesNotifications=true

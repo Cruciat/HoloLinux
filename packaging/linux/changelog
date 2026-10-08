@@ -1,0 +1,7 @@
+holo (0.1.0-1) unstable; urgency=medium
+
+  * Linux port of Holo: ALSA/PipeWire capture, terminal calibration,
+    evaluation, comparison and monitoring, zone actions, and a systemd
+    user service.
+
+ -- Holo Linux port <cruciat@users.noreply.github.com>  Thu, 08 Oct 2026 16:20:00 +0200

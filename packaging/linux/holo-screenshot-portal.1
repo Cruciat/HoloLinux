@@ -1,0 +1,15 @@
+.TH HOLO-SCREENSHOT-PORTAL 1 "October 2026" "holo 0.1.0" "User Commands"
+.SH NAME
+holo-screenshot-portal \- copy a screenshot to the clipboard via the desktop portal
+.SH SYNOPSIS
+.B holo-screenshot-portal
+.RB [ \-\-interactive ]
+.SH DESCRIPTION
+Takes a screenshot through the XDG desktop portal, copies it to the
+clipboard, and deletes the temporary file. With
+.B \-\-interactive
+the desktop's own area and window picker opens. Used by
+.BR holo (1)
+for the screenshot actions when gnome-screenshot is not installed.
+.SH SEE ALSO
+.BR holo (1)
